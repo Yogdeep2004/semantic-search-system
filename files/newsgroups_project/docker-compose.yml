@@ -1,0 +1,45 @@
+version: "3.9"
+
+# ============================================================
+# docker-compose.yml — Hybrid Semantic Search Stack
+# ============================================================
+# Starts the FastAPI service with:
+#   • persistent data volume for dataset + index artefacts
+#   • automatic restart on failure
+#
+# Quick start
+# -----------
+#   docker-compose up --build
+#
+# First-time index build (run once before starting the API):
+#   docker-compose run --rm api python build_index.py \
+#       --zip_path /data/twenty_newsgroups_dataset.zip
+#
+# The API will be available at: http://localhost:8000
+# Swagger UI:                   http://localhost:8000/docs
+# ReDoc:                        http://localhost:8000/redoc
+# ============================================================
+
+services:
+  api:
+    build: .
+    container_name: hybrid-search-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount local ./data into the container so that built indices
+      # persist across container restarts.
+      - ./data:/app/data
+    environment:
+      - DATA_DIR=/app/data/raw/20_newsgroups
+      - EMBED_CACHE=/app/data/cache/embeddings.npy
+      - BM25_CACHE=/app/data/cache/bm25.pkl
+      - CLUSTER_CACHE=/app/data/cache/clusters.pkl
+      - CACHE_THRESHOLD=0.85
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

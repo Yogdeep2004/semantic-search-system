@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sentence-transformers
+faiss-cpu
+scikit-learn
+scikit-fuzzy
+rank-bm25
+numpy
+pandas
+tqdm
+matplotlib
+python-multipart
+pickle5; python_version < '3.8'
